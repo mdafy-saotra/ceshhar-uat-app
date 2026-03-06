@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { useState } from "react";
 
 const COLORS = {
@@ -254,6 +253,7 @@ const INITIAL_ISSUES = [
   { id: "UAT-001", date: "", tester: "", scenario: "", description: "", severity: "High", status: "Open", assignedTo: "", resolution: "" },
 ];
 
+// eslint-disable-next-line no-unused-vars
 const ROLE_COLORS = {
   Microplanner: { bg: "#ebf8ff", color: "#2b6cb0" },
   "Outreach Worker": { bg: "#f0fff4", color: "#276749" },
@@ -752,12 +752,22 @@ export default function App() {
   const [issues, setIssues] = useState(INITIAL_ISSUES);
 
   const tabs = [
-    { id: "overview", label: "Overview" },
-    { id: "qa", label: "QA Plan", count: QA_MODULES.length },
+    { id: "overview", label: "UAT Summary" },
+    { id: "qa", label: "Test Cases", count: QA_MODULES.length },
     { id: "uat", label: "UAT Scenarios", count: UAT_SCENARIOS.length },
-    { id: "issues", label: "Issue Log", count: issues.length },
-    { id: "signoff", label: "Sign-Off" },
+    { id: "issues", label: "Defect Log", count: issues.length },
+    { id: "signoff", label: "Sign-off Tracker" },
   ];
+
+  const totalSteps = UAT_SCENARIOS.reduce((a, s) => a + s.steps.length, 0);
+  const passed = Object.values(results).filter(v => v === "PASS").length;
+  const failed = Object.values(results).filter(v => v === "FAIL").length;
+  const blocked = Object.values(results).filter(v => v === "BLOCKED").length;
+  const remaining = totalSteps - passed - failed - blocked;
+  const pct = totalSteps > 0 ? Math.round((passed / totalSteps) * 100) : 0;
+  const critical = QA_MODULES.filter(m => m.priority === "P1").length;
+  const high = QA_MODULES.filter(m => m.priority === "P2").length;
+  const medium = QA_MODULES.filter(m => m.priority === "P3").length;
 
   return (
     <div style={{ fontFamily: "'Inter', -apple-system, sans-serif", minHeight: "100vh", background: COLORS.light }}>
@@ -780,6 +790,7 @@ export default function App() {
             </div>
           </div>
         </div>
+        {/* Tab bar */}
         <div style={{ display: "flex", borderTop: "1px solid rgba(255,255,255,0.1)", marginTop: 8 }}>
           {tabs.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)} style={{
@@ -794,6 +805,35 @@ export default function App() {
               )}
             </button>
           ))}
+        </div>
+
+        {/* Progress bar strip */}
+        <div style={{ background: "rgba(0,0,0,0.25)", padding: "10px 24px", display: "flex", flexDirection: "column", gap: 8 }}>
+          {/* Bar row */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", whiteSpace: "nowrap" }}>Progress:</span>
+            <div style={{ flex: 1, background: "rgba(255,255,255,0.15)", borderRadius: 6, height: 10, overflow: "hidden" }}>
+              <div style={{ width: `${pct}%`, height: "100%", background: pct === 100 ? "#48bb78" : "#63b3ed", borderRadius: 6, transition: "width 0.5s" }} />
+            </div>
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: 700, whiteSpace: "nowrap" }}>{pct}%</span>
+            <span style={{ fontSize: 12, color: "#68d391", whiteSpace: "nowrap" }}>✓ {passed} pass</span>
+            <span style={{ fontSize: 12, color: "#fc8181", whiteSpace: "nowrap" }}>✗ {failed} fail</span>
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", whiteSpace: "nowrap" }}>{remaining} remaining</span>
+          </div>
+          {/* Badges row */}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {[
+              { label: `Critical: ${critical}`, bg: "#fed7d7", color: "#822727" },
+              { label: `High: ${high}`, bg: "#feebc8", color: "#7b341e" },
+              { label: `Medium: ${medium}`, bg: "#fefcbf", color: "#744210" },
+              { label: `Pending: ${remaining}`, bg: "#e2e8f0", color: "#4a5568" },
+              { label: `Pass: ${passed}`, bg: "#c6f6d5", color: "#22543d" },
+              { label: `Fail: ${failed}`, bg: "#fed7d7", color: "#822727" },
+              { label: `Blocked: ${blocked}`, bg: "#e9d8fd", color: "#44337a" },
+            ].map((b, i) => (
+              <span key={i} style={{ background: b.bg, color: b.color, padding: "2px 12px", borderRadius: 12, fontSize: 12, fontWeight: 700 }}>{b.label}</span>
+            ))}
+          </div>
         </div>
       </div>
 
