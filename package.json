@@ -1,6 +1,7 @@
 {
   "name": "ceshhar-uat-app",
   "version": "0.1.0",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -15,12 +16,3 @@
     "vite": "^5.0.0"
   }
 }
-```
-
-### Step 2 — Make sure your `src/` folder has exactly these 2 files:
-- `src/App.jsx` ← the React code
-- `src/main.jsx` ← the entry point
-
-### Step 3 — Add a `.env` file in the root to disable ESLint errors:
-```
-DISABLE_ESLINT_PLUGIN=true
